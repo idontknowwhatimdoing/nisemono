@@ -1,0 +1,8 @@
+[package]
+name = "arp-spoof"
+version = "0.1.0"
+authors = ["jeremy <jeyx.22@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+smoltcp = "0.6.0"
