@@ -34,8 +34,15 @@ fn build_socket() -> Option<RawSocket> {
 	None
 }
 
-fn display_buffer(buffer: &mut [u8]) -> Result<(), smoltcp::Error> {
-	println!("size : {}\n{:x?}\n", buffer.len(), buffer);
+fn is_arp(buffer: &mut [u8]) -> bool {
+	buffer[12] == 8 && buffer[13] == 6
+}
+
+fn handle_frame(buffer: &mut [u8]) -> Result<(), smoltcp::Error> {
+	if is_arp(buffer) {
+		println!("{:x?}\n", buffer);
+	}
+
 	Ok(())
 }
 
@@ -43,7 +50,7 @@ fn capture_frames(mut socket: RawSocket) {
 	loop {
 		wait(socket.as_raw_fd(), None).unwrap();
 		let (rx, _) = socket.receive().unwrap();
-		rx.consume(Instant::now(), |buffer| display_buffer(buffer))
+		rx.consume(Instant::now(), |buffer| handle_frame(buffer))
 			.unwrap();
 	}
 }
