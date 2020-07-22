@@ -1,0 +1,14 @@
+1) List all hosts on the local network and display them in a nice list Widget
+	- get local network address
+	- bruteforce all available addresses and ping them (ping -w 1 <each IP>)
+	- check exit code (0 == success)
+
+
+192.168.0.43/26
+192.168.0  .43
+255.255.255.248
+		   .0010 1011
+	       .1111 1000
+
+network address : 192.168.0.40/26
+number of hosts : 9
