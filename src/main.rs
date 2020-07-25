@@ -1,8 +1,9 @@
 mod net;
+use net::*;
 
 fn main() {
-	match net::build_socket() {
-		Ok(mut socket) => net::send_arp_request(&mut socket),
+	match utils::build_socket() {
+		Ok(mut socket) => arp::send_request(&mut socket),
 		Err(e) => println!("{}", e),
 	}
 }
