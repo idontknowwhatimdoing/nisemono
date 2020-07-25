@@ -28,24 +28,20 @@ pub fn get_local_ip() -> Option<[u8; 4]> {
 	None
 }
 
-fn is_valid(ip: &String) -> bool {
-	Regex::new(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
+pub fn is_valid(ip: &String) -> bool {
+	Regex::new(r"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")
 		.unwrap()
 		.is_match(ip)
 }
 
-pub fn parse_ip(ip: String) -> Result<[u8; 4], String> {
-	if is_valid(&ip) {
-		let mut bytes = [0; 4];
+pub fn parse_ip(ip: &String) -> [u8; 4] {
+	let mut bytes = [0; 4];
 
-		for (i, byte) in ip.split(".").enumerate() {
-			bytes[i] = byte.parse().unwrap();
-		}
-
-		Ok(bytes)
-	} else {
-		Err("invalid IP address ...".to_owned())
+	for (i, byte) in ip.split(".").enumerate() {
+		bytes[i] = byte.parse().unwrap();
 	}
+
+	bytes
 }
 
 pub fn get_local_mac(iface: String) -> [u8; 6] {
