@@ -8,7 +8,7 @@ fn _filter_reply(buffer: &mut [u8]) -> bool {
 	buffer[12] == 8 && buffer[13] == 6
 }
 
-fn _handle_frame(buffer: &mut [u8]) -> Result<(), smoltcp::Error> {
+fn _handle_reply(buffer: &mut [u8]) -> Result<(), smoltcp::Error> {
 	if _filter_reply(buffer) {
 		println!("{:x?}\n", buffer);
 	}
@@ -16,10 +16,19 @@ fn _handle_frame(buffer: &mut [u8]) -> Result<(), smoltcp::Error> {
 	Ok(())
 }
 
+pub fn _capture_reply(socket: &mut RawSocket) {
+	loop {
+		wait(socket.as_raw_fd(), None).unwrap();
+		let (rx, _) = socket.receive().unwrap();
+		rx.consume(Instant::now(), |buffer| _handle_reply(buffer))
+			.unwrap();
+	}
+}
+
 fn craft_request(buffer: &mut [u8]) -> Result<(), smoltcp::Error> {
 	let sender_mac = get_local_mac(get_iface_name().unwrap());
 	let sender_ip = get_local_ip().unwrap();
-	let target_ip = parse_ip(args().nth(1).unwrap());
+	let target_ip = parse_ip(args().nth(1).unwrap()).unwrap();
 	let mut j = 0;
 
 	// dest
@@ -88,13 +97,4 @@ pub fn send_request(socket: &mut RawSocket) {
 	let tx = socket.transmit().unwrap();
 	tx.consume(Instant::now(), 42, |buffer| craft_request(buffer))
 		.unwrap();
-}
-
-pub fn _capture_frames(mut socket: RawSocket) {
-	loop {
-		wait(socket.as_raw_fd(), None).unwrap();
-		let (rx, _) = socket.receive().unwrap();
-		rx.consume(Instant::now(), |buffer| _handle_frame(buffer))
-			.unwrap();
-	}
 }
