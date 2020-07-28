@@ -1,7 +1,0 @@
-- Get local IP and MAC addresses
-
-- Send a broadcast ARP request with the target IP to get its MAC address
-
-- Send an ARP reply to the target with the MAC address of the router
-
-- Send an ARP reply to the router with the MAC address of the target

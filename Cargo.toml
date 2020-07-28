@@ -1,5 +1,5 @@
 [package]
-name = "arp-spoof"
+name = "nisemono"
 version = "0.1.0"
 authors = ["jeremy <jeyx.22@gmail.com>"]
 edition = "2018"

