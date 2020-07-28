@@ -1,8 +1,11 @@
 [package]
 name = "nisemono"
 version = "0.1.0"
-authors = ["jeremy <jeyx.22@gmail.com>"]
+authors = ["idontknowwhatimdoing <jeyx.22@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+repository = "https://github.com/idontknowwhatimdoing/nisemono"
+license = "MIT"
 
 [dependencies]
 smoltcp = "0.6.0"
