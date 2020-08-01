@@ -1,4 +1,5 @@
 use crate::net::utils::*;
+use ansi_term::Color;
 use smoltcp::phy::{wait, Device, RawSocket, RxToken, TxToken};
 use smoltcp::time::Instant;
 use std::os::unix::io::AsRawFd;
@@ -68,7 +69,7 @@ pub fn send(socket: &mut RawSocket, target_ip: &[u8]) {
         .unwrap();
 }
 
-fn is_target_reply(buffer: &mut [u8], target_ip: &[u8]) -> bool {
+pub fn is_target_reply(buffer: &mut [u8], target_ip: &[u8]) -> bool {
     let local_mac = get_local_mac(get_iface_name().unwrap());
     let mut ip_ok = true;
     let mut mac_ok = true;
@@ -113,7 +114,7 @@ pub fn get_target_mac(socket: &mut RawSocket, target_ip: &[u8]) -> [u8; 6] {
         let (rx, _) = socket.receive().unwrap();
         match rx.consume(Instant::now(), |buffer| extract_mac(buffer, target_ip)) {
             Ok(mac) => return mac,
-            Err(_) => println!("not yet"),
+            Err(_) => print!("{}", Color::Green.paint(".")),
         }
     }
 }
