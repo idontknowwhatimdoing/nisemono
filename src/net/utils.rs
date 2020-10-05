@@ -60,8 +60,8 @@ pub fn build_socket() -> Result<RawSocket, String> {
     match get_iface_name() {
         Some(iface) => match RawSocket::new(iface.as_str()) {
             Ok(socket) => Ok(socket),
-            Err(_) => Err("\nsocket creation error\n".to_owned()),
+            Err(_) => Err("socket creation error".to_owned()),
         },
-        None => Err("\nno network interface found\n".to_owned()),
+        None => Err("no network interface found".to_owned()),
     }
 }

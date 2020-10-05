@@ -95,7 +95,6 @@ pub fn is_target_reply(buffer: &mut [u8], target_ip: &[u8]) -> bool {
 
 fn extract_mac(buffer: &mut [u8], target_ip: &[u8]) -> Result<[u8; 6], smoltcp::Error> {
     if is_target_reply(buffer, target_ip) {
-        // extract target's MAC address
         let mut mac = [0; 6];
 
         for (j, i) in (6..12).enumerate() {
