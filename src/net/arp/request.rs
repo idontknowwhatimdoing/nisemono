@@ -65,8 +65,7 @@ fn craft_frame(buffer: &mut [u8], target_ip: &[u8]) -> Result<(), smoltcp::Error
 
 pub fn send(socket: &mut RawSocket, target_ip: &[u8]) {
     let tx = socket.transmit().unwrap();
-    tx.consume(Instant::now(), 42, |buffer| craft_frame(buffer, target_ip))
-        .unwrap();
+    tx.consume(Instant::now(), 42, |buffer| craft_frame(buffer, target_ip)).unwrap();
 }
 
 pub fn is_target_reply(buffer: &mut [u8], target_ip: &[u8]) -> bool {
@@ -113,7 +112,7 @@ pub fn get_target_mac(socket: &mut RawSocket, target_ip: &[u8]) -> [u8; 6] {
         let (rx, _) = socket.receive().unwrap();
         match rx.consume(Instant::now(), |buffer| extract_mac(buffer, target_ip)) {
             Ok(mac) => return mac,
-            Err(_) => print!("{}", Color::Green.paint(".")),
+            Err(_) => print!("{}", Color::Green.paint("."))
         }
     }
 }
