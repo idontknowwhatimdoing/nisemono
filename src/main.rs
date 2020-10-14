@@ -1,6 +1,6 @@
 mod net;
 mod ui;
-use ansi_term::Color;
+use ansi_term::{Color, Style};
 use net::arp::*;
 use net::*;
 use std::env::args;
@@ -27,14 +27,15 @@ fn main() {
 
     if let Err(e) = utils::build_socket() {
         eprintln!("{} {}", Color::Red.bold().paint("error:"), e);
-        std::process::exit(1);
+        return;
     }
 
     if args().len() == 3 {
         let target_a_ip = args().nth(1).unwrap();
         let target_b_ip = args().nth(2).unwrap();
 
-        if utils::is_valid(&target_a_ip) && utils::is_valid(&target_b_ip) {
+        let invalid_ips = utils::is_valid(&target_a_ip, &target_b_ip);
+        if invalid_ips.len() == 0 {
             let target_a_ip = utils::parse_ip(&target_a_ip);
             let target_b_ip = utils::parse_ip(&target_b_ip);
 
@@ -49,7 +50,9 @@ fn main() {
 
             // forwarding thread
         } else {
-            eprintln!("{} invalid IP address(es)", Color::Red.bold().paint("error:"));
+            for ip in invalid_ips {
+                eprintln!("{} invalid IP address => {}", Color::Red.bold().paint("error:"), Style::new().bold().paint(ip));
+            }
         }
     } else {
         eprintln!("usage: sudo ./nisemono <target_IP> <other_target_IP>");

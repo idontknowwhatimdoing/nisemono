@@ -27,10 +27,18 @@ pub fn get_local_ip() -> Option<[u8; 4]> {
     None
 }
 
-pub fn is_valid(ip: &str) -> bool {
-    Regex::new(r"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")
-		.unwrap()
-		.is_match(ip)
+pub fn is_valid(target_a_ip: &str, target_b_ip: &str) -> Vec<String> {
+    let mut invalid_ips = Vec::new();
+    let valid_ip = Regex::new(r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$").unwrap();
+
+    if !valid_ip.is_match(target_a_ip) {
+        invalid_ips.push(target_a_ip.to_owned());
+    }
+    if !valid_ip.is_match(target_b_ip) {
+        invalid_ips.push(target_b_ip.to_owned());
+    }
+
+    invalid_ips
 }
 
 pub fn parse_ip(ip: &str) -> [u8; 4] {
