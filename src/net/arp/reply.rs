@@ -1,6 +1,7 @@
 use crate::net::utils::*;
 use smoltcp::phy::{Device, RawSocket, TxToken};
 use smoltcp::time::Instant;
+use std::env::args;
 
 pub fn craft_frame(
     buffer: &mut [u8],
@@ -8,7 +9,7 @@ pub fn craft_frame(
     target_a_mac: &[u8],
     target_b_ip: &[u8],
 ) -> Result<(), smoltcp::Error> {
-    let local_mac = get_local_mac(get_iface_name().unwrap());
+    let local_mac = get_local_mac(&args().nth(1).unwrap()).octets();
 
     // dest
     for (j, i) in (0..6).enumerate() {

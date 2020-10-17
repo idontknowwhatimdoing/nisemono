@@ -1,12 +1,14 @@
 use crate::net::utils::*;
-use ansi_term::Color;
+use crate::net::mac_addr::MacAddr;
 use smoltcp::phy::{wait, Device, RawSocket, RxToken, TxToken};
 use smoltcp::time::Instant;
 use std::os::unix::io::AsRawFd;
+use std::env::args;
+use std::net::Ipv4Addr;
 
 fn craft_frame(buffer: &mut [u8], target_ip: &[u8]) -> Result<(), smoltcp::Error> {
-    let sender_mac = get_local_mac(get_iface_name().unwrap());
-    let sender_ip = get_local_ip().unwrap();
+    let sender_mac = get_local_mac(&args().nth(1).unwrap()).octets();
+    let sender_ip = get_local_ip().unwrap().octets();
 
     // dest
     for byte in buffer.iter_mut().take(6) {
@@ -68,51 +70,28 @@ pub fn send(socket: &mut RawSocket, target_ip: &[u8]) {
     tx.consume(Instant::now(), 42, |buffer| craft_frame(buffer, target_ip)).unwrap();
 }
 
-pub fn is_target_reply(buffer: &mut [u8], target_ip: &[u8]) -> bool {
-    let local_mac = get_local_mac(get_iface_name().unwrap());
-    let mut ip_ok = true;
-    let mut mac_ok = true;
-
-    // dest == local_mac
-    for (j, i) in (0..6).enumerate() {
-        if buffer[i] != local_mac[j] {
-            mac_ok = false;
-            break;
-        }
-    }
-
-    // target_ip == sender_ip
-    for (j, i) in (28..32).enumerate() {
-        if buffer[i] != target_ip[j] {
-            ip_ok = false;
-            break;
-        }
-    }
+pub fn is_target_reply(buffer: &mut [u8], target_ip: &Ipv4Addr) -> bool {
+    let local_mac = get_local_mac(&args().nth(1).unwrap());
+    let mac_ok = local_mac == MacAddr::from(&buffer[0..6]);
+    let ip_ok = *target_ip == Ipv4Addr::new(buffer[28], buffer[29], buffer[30], buffer[31]);
 
     buffer[12] == 8 && buffer[13] == 6 && buffer[20] == 0 && buffer[21] == 2 && ip_ok && mac_ok
 }
 
-fn extract_mac(buffer: &mut [u8], target_ip: &[u8]) -> Result<[u8; 6], smoltcp::Error> {
+fn extract_mac(buffer: &mut [u8], target_ip: &Ipv4Addr) -> Result<MacAddr, smoltcp::Error> {
     if is_target_reply(buffer, target_ip) {
-        let mut mac = [0; 6];
-
-        for (j, i) in (6..12).enumerate() {
-            mac[j] = buffer[i];
-        }
-
-        return Ok(mac);
+        return Ok(MacAddr::from(&buffer[6..12]));
     }
 
     Err(smoltcp::Error::__Nonexhaustive)
 }
 
-pub fn get_target_mac(socket: &mut RawSocket, target_ip: &[u8]) -> [u8; 6] {
+pub fn get_target_mac(socket: &mut RawSocket, target_ip: &Ipv4Addr) -> MacAddr {
     loop {
         wait(socket.as_raw_fd(), None).unwrap();
         let (rx, _) = socket.receive().unwrap();
-        match rx.consume(Instant::now(), |buffer| extract_mac(buffer, target_ip)) {
-            Ok(mac) => return mac,
-            Err(_) => print!("{}", Color::Green.paint("."))
+        if let Ok(mac) = rx.consume(Instant::now(), |buffer| extract_mac(buffer, target_ip)) {
+            return mac;
         }
     }
 }

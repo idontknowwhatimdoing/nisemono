@@ -9,6 +9,5 @@ license = "MIT"
 
 [dependencies]
 smoltcp = "0.6.0"
-systemstat = "0.1.5"
 regex = "1.3.9"
 ansi_term = "0.12.1"
