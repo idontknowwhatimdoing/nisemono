@@ -23,6 +23,7 @@ impl MacAddr {
     }
 
     pub const BROADCAST: Self = MacAddr::new(255, 255, 255, 255, 255, 255);
+    pub const UNSPECIFIED: Self = MacAddr::new(0, 0, 0, 0, 0, 0);
 }
 
 impl fmt::Display for MacAddr {

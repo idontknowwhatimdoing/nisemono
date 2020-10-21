@@ -56,9 +56,9 @@ fn main() {
             let target_b_mac = thread_b.join().unwrap();
             println!("{}", Color::Green.paint(" "));
 
-            thread::spawn(move || arp_cache_poisoning(target_a_ip.clone(), target_b_ip.clone(), target_a_mac.clone(), target_b_mac.clone()));
+            thread::spawn(move || arp_cache_poisoning(target_a_ip, target_b_ip, target_a_mac, target_b_mac));
 
-            thread::spawn(move || forward(target_a_mac.clone(), target_b_mac.clone())).join().unwrap();
+            thread::spawn(move || forward(target_a_mac, target_b_mac)).join().unwrap();
         } else {
             for ip in invalid_ips {
                 eprintln!("{} invalid IP address => {}", Color::Red.bold().paint("error:"), Style::new().bold().paint(ip));
