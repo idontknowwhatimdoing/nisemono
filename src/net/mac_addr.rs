@@ -36,12 +36,11 @@ impl FromStr for MacAddr {
     type Err = ParseIntError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut octets = [ 0, 0, 0, 0, 0, 0 ];
+        let mut octets = [0; 6];
 
         for (i, byte) in s.trim().split(':').enumerate() {
             octets[i] = u8::from_str_radix(byte, 16)?;
         }
-
         Ok(MacAddr::from(octets))
     }
 }

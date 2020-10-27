@@ -1,6 +1,5 @@
+use std::convert::From;
 use crate::mac_addr::MacAddr;
-use crate::utils::get_local_mac;
-use std::env::args;
 
 pub type Word = [u8; 2];
 
@@ -15,12 +14,10 @@ impl Frame {
     pub fn new(dst: MacAddr, src: MacAddr, ether_type: Word) -> Self {
         Frame { dst, src, ether_type }
     }
+}
 
-    pub fn new_arp_request_frame() -> Self {
-        Frame {
-            dst: MacAddr::BROADCAST,
-            src: get_local_mac(&args().nth(1).unwrap()),
-            ether_type: [8, 6]
-        }
+impl From<&[u8]> for Frame {
+    fn from(buffer: &[u8]) -> Self {
+        Frame::new(MacAddr::from(&buffer[..6]), MacAddr::from(&buffer[6..12]), [buffer[12], buffer[13]])
     }
 }

