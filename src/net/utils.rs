@@ -33,6 +33,5 @@ pub fn is_valid(target_a_ip: &str, target_b_ip: &str) -> Vec<String> {
     if !valid_ip.is_match(target_b_ip) {
         invalid_ips.push(target_b_ip.to_owned());
     }
-
     invalid_ips
 }
